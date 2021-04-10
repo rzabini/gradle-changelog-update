@@ -15,17 +15,9 @@ import java.util.regex.Matcher
 @CompileStatic
 class MessageParser {
 
-    static Optional<Item> findItemInLastCommitMessage(File gitDir) {
-        Matcher matcher = matcher(gitDir)
-
-        matcher.matches() ?
-                Optional.of(new Item(matcher.group(1), matcher.group(2)))
-                : Optional.empty() as Optional<Item>
-    }
-
     static List<Item> findRecentCommitMessages(File gitDir, File changeLog) {
         Git git = new Git(new FileRepositoryBuilder().findGitDir(gitDir).build())
-        ObjectId until = git.getRepository().resolve(Constants.HEAD);
+        ObjectId until = git.repository.resolve(Constants.HEAD)
         ObjectId since = git.log().addPath(gitDir.relativePath(changeLog)).setMaxCount(1).call().first().id
 
         git.log().addRange(since, until).call()
@@ -34,9 +26,4 @@ class MessageParser {
                 .collect { Matcher it -> new Item(it.group(1), it.group(2)) }
     }
 
-    private static Matcher matcher(File gitDir) {
-        Git git = new Git(new FileRepositoryBuilder().findGitDir(gitDir).build())
-        String message = git.log().setMaxCount(1).call().first().shortMessage
-        message =~ /^(Added|Fixed|Changed|Deprecated|Removed|Security): (.+)$/
-    }
 }

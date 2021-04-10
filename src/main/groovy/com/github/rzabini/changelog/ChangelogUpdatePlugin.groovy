@@ -1,28 +1,31 @@
 package com.github.rzabini.changelog
 
 import com.github.rzabini.changelog.git.MessageParser
-import com.github.rzabini.changelog.model.Changelog
 import com.github.rzabini.changelog.model.Item
+import com.github.rzabini.changelog.model.Changelog
 import groovy.transform.CompileDynamic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- * Gradle plugin which updates changelog with last commit message.
+ * Gradle plugin which updates changelog with last commit messages.
  */
 @CompileDynamic
 class ChangelogUpdatePlugin implements Plugin<Project> {
+
+    public static final String CHANGELOG_FILE = 'CHANGELOG.md'
+
     @Override
     void apply(Project project) {
         project.task('updateChangelog') {
             doLast {
                 Optional<File> changelogFile = changelogFile(project)
-                if (changelogFile.isPresent()) {
+                if (changelogFile.present) {
                     List<Item> items = MessageParser.findRecentCommitMessages(project.rootDir, changelogFile.get())
                     if (items.size() > 0) {
-                        Changelog changelog = new Changelog(changelogFile.get(), project.logger)
+                        Changelog changelog = new Changelog(changelogFile.get())
                         items.each {
-                            Item item -> changelog.addUniqueItem(item.type, item.text)
+                            Item item -> changelog.addItem(item.type, item.text)
                         }
                         changelogFile.get().text = changelog.render()
                     }
@@ -32,6 +35,9 @@ class ChangelogUpdatePlugin implements Plugin<Project> {
     }
 
     private static Optional<File> changelogFile(Project project) {
-        project.file('CHANGELOG.md').exists() ? Optional.of(project.file('CHANGELOG.md')) : Optional.empty() as Optional<File>
+        project.file(CHANGELOG_FILE).exists() ?
+                Optional.of( project.file(CHANGELOG_FILE) ) :
+                Optional.empty() as Optional<File>
     }
+
 }

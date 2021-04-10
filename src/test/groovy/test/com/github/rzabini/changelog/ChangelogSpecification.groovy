@@ -16,7 +16,7 @@ class ChangelogSpecification extends Specification {
         given:
             Changelog changelog = new Changelog(changelogFile('one-item'))
         when:
-            changelog.addUniqueItem('Added', 'second')
+            changelog.addItem('Added','second')
         then:
             changelog.render() == changelogFile('two-items').text
     }
@@ -25,26 +25,17 @@ class ChangelogSpecification extends Specification {
         given:
             Changelog changelog = new Changelog(changelogFile('one-item'))
         when:
-            changelog.addUniqueItem('Fixed', 'second')
+            changelog.addItem('Fixed', 'second')
         then:
             changelog.render() == changelogFile('fixed-item-added').text
-    }
 
-    def idempotent() {
-        given:
-            Changelog changelog = new Changelog(changelogFile('one-item'))
-        when:
-            changelog.addUniqueItem('Fixed', 'second')
-            changelog.addUniqueItem('Fixed', 'second')
-        then:
-            changelog.render() == changelogFile('fixed-item-added').text
     }
 
     def addWithPreviousVersion() {
         given:
             Changelog changelog = new Changelog(changelogFile('previous-version'))
         when:
-            changelog.addUniqueItem('Added', 'second')
+            changelog.addItem('Added', 'second')
         then:
             changelog.render() == changelogFile('previous-version-add-item').text
     }
@@ -54,7 +45,7 @@ class ChangelogSpecification extends Specification {
         given:
             Changelog changelog = new Changelog(changelogFile('previous-version'))
         when:
-            changelog.addUniqueItem('Fixed', 'second')
+            changelog.addItem('Fixed', 'second')
         then:
             changelog.render() == changelogFile('previous-version-fix-item').text
     }
@@ -63,7 +54,7 @@ class ChangelogSpecification extends Specification {
         given:
             Changelog changelog = new Changelog(changelogFile('one-fixed-item'))
         when:
-            changelog.addUniqueItem('Added', 'second')
+            changelog.addItem('Added', 'second')
         then:
             changelog.render() == changelogFile('one-fixed-item-add').text
     }
@@ -72,7 +63,7 @@ class ChangelogSpecification extends Specification {
         given:
             Changelog changelog = new Changelog(changelogFile('added-fixed'))
         when:
-            changelog.addUniqueItem('Security', 'sec')
+            changelog.addItem('Security', 'sec')
         then:
             changelog.render() == changelogFile('added-fixed-security').text
     }
@@ -81,7 +72,7 @@ class ChangelogSpecification extends Specification {
         given:
             Changelog changelog = new Changelog(changelogFile('added-security'))
         when:
-            changelog.addUniqueItem('Fixed', 'fix')
+            changelog.addItem('Fixed', 'fix')
         then:
             changelog.render() == changelogFile('added-fixed-security').text
     }

@@ -1,7 +1,13 @@
 package com.github.rzabini.changelog.render
 
 import groovy.transform.CompileStatic
-import org.commonmark.node.*
+import org.commonmark.node.BulletList
+import org.commonmark.node.Heading
+import org.commonmark.node.Link
+import org.commonmark.node.ListItem
+import org.commonmark.node.Node
+import org.commonmark.node.Paragraph
+import org.commonmark.node.Text
 import org.commonmark.renderer.text.CoreTextContentNodeRenderer
 import org.commonmark.renderer.text.TextContentNodeRendererContext
 import org.commonmark.renderer.text.TextContentWriter
@@ -16,7 +22,7 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
     ChangelogRenderer(TextContentNodeRendererContext context) {
         super(context)
         this.textContent = context.writer
-
+        
     }
 
     @Override
