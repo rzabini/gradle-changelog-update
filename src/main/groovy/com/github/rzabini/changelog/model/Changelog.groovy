@@ -102,8 +102,8 @@ class Changelog {
         }
     }
 
-    private BulletList sectionItemList(String type) {
-        (unreleasedSection(type) ? unreleasedSection(type).next : previousElement(type)) as BulletList
+    private Node sectionItemList(String type) {
+        (unreleasedSection(type) ? unreleasedSection(type).next : previousElement(type)) as Node
     }
 
     private List<Heading> unreelasedSections() {
