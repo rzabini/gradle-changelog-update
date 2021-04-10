@@ -2,7 +2,13 @@ package com.github.rzabini.changelog.model
 
 import com.github.rzabini.changelog.render.ChangelogRendererFactory
 import groovy.transform.CompileStatic
-import org.commonmark.node.*
+import org.commonmark.node.Node
+import org.commonmark.node.BulletList
+import org.commonmark.node.Document
+import org.commonmark.node.Heading
+import org.commonmark.node.ListItem
+import org.commonmark.node.Paragraph
+import org.commonmark.node.Text
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.text.TextContentRenderer
 import org.slf4j.Logger
@@ -57,6 +63,20 @@ class Changelog {
         items.appendChild(newListItem(item))
     }
 
+    private static Heading newSection(String type) {
+        Heading heading = new Heading(level: SECTION_LEVEL)
+        heading.appendChild(new Text(type))
+        heading
+    }
+
+    private static ListItem newListItem(String item) {
+        Paragraph paragraph = new Paragraph()
+        paragraph.appendChild(new Text(item))
+        ListItem listItem = new ListItem()
+        listItem.appendChild(paragraph)
+        listItem
+    }
+
     private Heading ensureUnreleasedSection(String type) {
         Heading section = unreleasedSection(type)
         if (section == null) {
@@ -86,12 +106,6 @@ class Changelog {
         (unreleasedSection(type) ? unreleasedSection(type).next : previousElement(type)) as BulletList
     }
 
-    private Heading newSection(String type) {
-        Heading heading = new Heading(level: SECTION_LEVEL)
-        heading.appendChild(new Text(type))
-        heading
-    }
-
     private List<Heading> unreelasedSections() {
         List list = []
         Heading section = unreleased().next as Heading
@@ -102,11 +116,4 @@ class Changelog {
         list
     }
 
-    private ListItem newListItem(String item) {
-        Paragraph paragraph = new Paragraph()
-        paragraph.appendChild(new Text(item))
-        ListItem listItem = new ListItem()
-        listItem.appendChild(paragraph)
-        listItem
-    }
 }
