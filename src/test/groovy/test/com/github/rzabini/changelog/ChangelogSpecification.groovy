@@ -35,7 +35,6 @@ class ChangelogSpecification extends Specification {
             changelog.addItem('Fixed', 'second')
         then:
             changelog.render() == changelogFile('fixed-item-added').text
-
     }
 
     def addWithPreviousVersion() {

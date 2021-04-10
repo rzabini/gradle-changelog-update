@@ -53,7 +53,6 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
 
     @Override
     void visit(Paragraph paragraph) {
-        //newline()
         visitChildren(paragraph)
         textContent.line()
     }
@@ -71,7 +70,6 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
     @Override
     void visit(ListItem listItem) {
         textContent.write('- ')
-        //visit(listItem.firstChild.firstChild as Text)
         visitChildren(listItem)
         textContent.line()
     }
