@@ -15,7 +15,7 @@ gradlePlugin {
     plugins {
         changelogUpdate {
             id = 'com.github.rzabini.changelog-update'
-            implementationClass = 'com.github.rzabini.ChangelogUpdatePlugin'
+            implementationClass = 'com.github.rzabini.changelog.ChangelogUpdatePlugin'
         }
     }
 }

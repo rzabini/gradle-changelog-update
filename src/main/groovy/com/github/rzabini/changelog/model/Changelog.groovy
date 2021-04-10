@@ -1,68 +1,101 @@
 package com.github.rzabini.changelog.model
 
-import com.github.rzabini.changelog.parse.ChangelogVisitor
 import com.github.rzabini.changelog.render.ChangelogRendererFactory
-import groovy.transform.CompileStatic
-import org.commonmark.node.Heading
-import org.commonmark.node.Paragraph
+import org.commonmark.node.*
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.text.TextContentRenderer
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-/**
- * Models a changelog according to keepachangelog format.
- */
-@CompileStatic
 class Changelog {
-    Heading title
-    Paragraph description
-    List<Version> versions = []
 
-    static Builder builder(File file) {
-        new Builder(file)
+    private final Document document
+    private final Logger logger
+    private static final List<String> TYPES = ['Added', 'Changed', 'Deprecated', 'Removed', 'Fixed', 'Security']
+
+    Changelog(File file) {
+        this(file, LoggerFactory.getLogger(Changelog))
     }
 
-    void addVersion(Heading heading) {
-        versions.add(new Version(heading: heading))
-    }
-
-    void addItemToUnreleasedVersion(Item item) {
-        versions.first().addItem(item)
-    }
-
-    void addItemToUnreleasedVersion(String type, String text) {
-        versions.first().addItem(new Item(type, text))
+    Changelog(File file, Logger logger) {
+        document = Parser.builder().build().parse(file.text) as Document
+        this.logger = logger
     }
 
     String render() {
         TextContentRenderer renderer = TextContentRenderer.builder()
                 .nodeRendererFactory(new ChangelogRendererFactory())
                 .build()
-        StringBuilder stringBuilder = new StringBuilder()
-
-        stringBuilder.append(renderer.render(title))
-
-        if (description != null) {
-            stringBuilder.append(renderer.render(description))
-        }
-
-        versions.each { version -> stringBuilder.append(version.render(renderer)) }
-
-        //println stringBuilder.toString()
-        stringBuilder.toString()
+        renderer.render(document)
     }
 
-    static class Builder {
-        private final String changelogText
+    Heading unreleased() {
+        document.firstChild.next.next as Heading
+    }
 
-        Builder(File changelogFile) {
-            this.changelogText = changelogFile.text
+    private List<Heading> unreelasedSections() {
+        List list = []
+        Heading section = unreleased().next as Heading
+        while (section != null && section.level == 3) {
+            list << section
+            section = section.next.next as Heading
         }
+        list
+    }
 
-        Changelog build() {
-            Changelog changelog = new Changelog()
-            Parser.builder().build().parse(changelogText)
-                    .accept(new ChangelogVisitor(changelog: changelog))
-            changelog
+    Heading unreleasedSection(String type) {
+        unreelasedSections().find { Heading heading -> (heading.firstChild as Text).literal == type }
+    }
+
+    private static ListItem newListItem(String item) {
+        Paragraph paragraph = new Paragraph()
+        paragraph.appendChild(new Text(item))
+        ListItem listItem = new ListItem()
+        listItem.appendChild(paragraph)
+        listItem
+    }
+
+    void addUniqueItem(String type, String item) {
+        BulletList items = ensureUnreleasedSection(type).next as BulletList
+        ListItem listItem = items.firstChild as ListItem
+        while (listItem != null) {
+            if ((listItem.firstChild.firstChild as Text).literal == item)
+                return
+            else listItem = listItem.next as ListItem
         }
+        logger.info("adding item: {} to section {}", item, type)
+        items.appendChild(newListItem(item))
+    }
+
+    private ensureUnreleasedSection(String type) {
+        Heading section = unreleasedSection(type)
+        if (section == null) {
+            section = addSection(type)
+        }
+        section
+    }
+
+    private addSection(String type) {
+        Heading section = newSection(type)
+        previousElement(type).insertAfter(section)
+        section.insertAfter(new BulletList())
+        section
+    }
+
+    private previousElement(String type) {
+        if (type == 'Added')
+            unreleased()
+        else
+            sectionItemList(TYPES.get(TYPES.findIndexOf { it == type } - 1))
+    }
+
+    private sectionItemList(String type) {
+        unreleasedSection(type) ? unreleasedSection(type).next : previousElement(type)
+    }
+
+    private static newSection(String type) {
+        Heading heading = new Heading(level: 3)
+        heading.appendChild(new Text(type))
+        heading
     }
 }

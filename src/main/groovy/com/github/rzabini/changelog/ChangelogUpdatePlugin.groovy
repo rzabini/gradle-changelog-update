@@ -14,27 +14,24 @@ import org.gradle.api.Project
 class ChangelogUpdatePlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
-        File postCommitHook = new File('.git/hooks', 'post-commit')
-        postCommitHook.withOutputStream { os ->
-            os << '#!/bin/sh\n'
-            os << './gradlew postCommit'
-        }
-        postCommitHook.setExecutable(true, true)
-
-        project.task('postCommit') {
+        project.task('updateChangelog') {
             doLast {
-                Optional<Item> item = MessageParser.findItemInLastCommitMessage(project.rootDir)
-
-                item.ifPresent {  ->
-                    Changelog changelog = Changelog.builder(project.file(changelogFileName())).build()
-                    changelog.addItemToUnreleasedVersion(it)
-                    project.file(changelogFileName()).text = changelog.render()
+                Optional<File> changelogFile = changelogFile(project)
+                if (changelogFile.isPresent()) {
+                    List<Item> items = MessageParser.findRecentCommitMessages(project.rootDir, changelogFile.get())
+                    if (items.size() > 0) {
+                        Changelog changelog = new Changelog(changelogFile.get(), project.logger)
+                        items.each {
+                            Item item -> changelog.addUniqueItem(item.type, item.text)
+                        }
+                        changelogFile.get().text = changelog.render()
+                    }
                 }
             }
         }
     }
 
-    private static String changelogFileName() {
-        'CHANGELOG.md'
+    private static Optional<File> changelogFile(Project project) {
+        project.file('CHANGELOG.md').exists() ? Optional.of(project.file('CHANGELOG.md')) : Optional.empty() as Optional<File>
     }
 }
