@@ -17,7 +17,7 @@ class ChangelogUpdatePlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.task('updateChangelog') {
+        project.task([group: 'changelog'], 'changelogUpdate') {
             doLast {
                 Optional<File> changelogFile = changelogFile(project)
                 if (changelogFile.present) {
