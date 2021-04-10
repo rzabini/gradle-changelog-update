@@ -7,13 +7,16 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.text.TextContentRenderer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
 /**
  *  This class models a changelog in markdown format
  */
 @CompileStatic
 class Changelog {
 
-    private static final List<String> TYPES = ['Added', 'Changed', 'Deprecated', 'Removed', 'Fixed', 'Security' ]
+    public static final String ADDED = 'Added'
+    private static final List<String> TYPES = [ADDED, 'Changed', 'Deprecated', 'Removed', 'Fixed', 'Security' ]
+    public static final int SECTION_LEVEL = 3
     private final Document document
     private final Logger logger
 
@@ -71,18 +74,20 @@ class Changelog {
     }
 
     private Node previousElement(String type) {
-        if (type == 'Added')
+        if (type == ADDED) {
             unreleased()
-        else
-            (sectionItemList(TYPES.get(TYPES.findIndexOf {it == type} - 1))) as Node
+        }
+        else {
+            (sectionItemList(TYPES.get(TYPES.findIndexOf { it == type } - 1)))
+        }
     }
 
-    private sectionItemList(String type) {
-        unreleasedSection(type) ? unreleasedSection(type).next : previousElement(type)
+    private BulletList sectionItemList(String type) {
+        (unreleasedSection(type) ? unreleasedSection(type).next : previousElement(type)) as BulletList
     }
 
-    private static Heading newSection(String type) {
-        Heading heading = new Heading(level: 3)
+    private Heading newSection(String type) {
+        Heading heading = new Heading(level: SECTION_LEVEL)
         heading.appendChild(new Text(type))
         heading
     }
@@ -90,14 +95,14 @@ class Changelog {
     private List<Heading> unreelasedSections() {
         List list = []
         Heading section = unreleased().next as Heading
-        while (section != null && section.level == 3) {
+        while (section != null && section.level == SECTION_LEVEL) {
             list << section
             section = section.next.next as Heading
         }
         list
     }
 
-    private static ListItem newListItem(String item) {
+    private ListItem newListItem(String item) {
         Paragraph paragraph = new Paragraph()
         paragraph.appendChild(new Text(item))
         ListItem listItem = new ListItem()

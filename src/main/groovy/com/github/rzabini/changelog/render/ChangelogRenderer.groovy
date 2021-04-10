@@ -22,7 +22,6 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
     ChangelogRenderer(TextContentNodeRendererContext context) {
         super(context)
         this.textContent = context.writer
-        
     }
 
     @Override
