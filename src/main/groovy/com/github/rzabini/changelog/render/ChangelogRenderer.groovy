@@ -7,6 +7,7 @@ import org.commonmark.node.Link
 import org.commonmark.node.ListItem
 import org.commonmark.node.Node
 import org.commonmark.node.Paragraph
+import org.commonmark.node.StrongEmphasis
 import org.commonmark.node.Text
 import org.commonmark.renderer.text.CoreTextContentNodeRenderer
 import org.commonmark.renderer.text.TextContentNodeRendererContext
@@ -31,7 +32,8 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
                 Paragraph,
                 Link,
                 ListItem,
-                BulletList
+                BulletList,
+                StrongEmphasis
         ))
     }
 
@@ -44,11 +46,14 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
         textContent.whitespace()
         visitChildren(heading)
         newline()
+        if (heading.level == 1) {
+            newline()
+        }
     }
 
     @Override
     void visit(Paragraph paragraph) {
-        newline()
+        //newline()
         visitChildren(paragraph)
         textContent.line()
     }
@@ -66,8 +71,16 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
     @Override
     void visit(ListItem listItem) {
         textContent.write('- ')
-        visit(listItem.firstChild.firstChild as Text)
+        //visit(listItem.firstChild.firstChild as Text)
+        visitChildren(listItem)
         textContent.line()
+    }
+
+    @Override
+    void visit(StrongEmphasis strongEmphasis) {
+        textContent.write('**')
+        visitChildren(strongEmphasis)
+        textContent.write('**')
     }
 
     private void writeLink(Node node, String title, String destination) {

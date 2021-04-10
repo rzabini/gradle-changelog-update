@@ -12,6 +12,13 @@ class ChangelogSpecification extends Specification {
             changelog.render() == changelogFile('one-item').text
     }
 
+    def parseWithEmphasis() {
+        when:
+            Changelog changelog = new Changelog(changelogFile('with-emphasis'))
+        then:
+            changelog.render() == changelogFile('with-emphasis').text
+    }
+
     def add() {
         given:
             Changelog changelog = new Changelog(changelogFile('one-item'))
