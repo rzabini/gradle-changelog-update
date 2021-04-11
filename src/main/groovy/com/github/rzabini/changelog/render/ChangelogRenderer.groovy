@@ -8,7 +8,6 @@ import org.commonmark.node.ListItem
 import org.commonmark.node.Node
 import org.commonmark.node.Paragraph
 import org.commonmark.node.StrongEmphasis
-import org.commonmark.node.Text
 import org.commonmark.renderer.text.CoreTextContentNodeRenderer
 import org.commonmark.renderer.text.TextContentNodeRendererContext
 import org.commonmark.renderer.text.TextContentWriter
@@ -18,6 +17,7 @@ import org.commonmark.renderer.text.TextContentWriter
  */
 @CompileStatic
 class ChangelogRenderer  extends CoreTextContentNodeRenderer {
+    public static final String STRONG_EMPHASIS_MARKER = '**'
     private final TextContentWriter textContent
 
     ChangelogRenderer(TextContentNodeRendererContext context) {
@@ -76,9 +76,9 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
 
     @Override
     void visit(StrongEmphasis strongEmphasis) {
-        textContent.write('**')
+        textContent.write(STRONG_EMPHASIS_MARKER)
         visitChildren(strongEmphasis)
-        textContent.write('**')
+        textContent.write(STRONG_EMPHASIS_MARKER)
     }
 
     private void writeLink(Node node, String title, String destination) {

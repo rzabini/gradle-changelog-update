@@ -6,6 +6,7 @@ import com.github.rzabini.changelog.model.Changelog
 import groovy.transform.CompileDynamic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+
 /**
  * Gradle plugin which updates changelog with last commit messages.
  */

@@ -6,9 +6,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.LogCommand
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.ObjectId
-import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-
 import java.util.regex.Matcher
 
 /**
@@ -19,7 +17,8 @@ class MessageParser {
 
     static List<Item> findRecentCommitMessages(File gitDir, String changeLogRelativePath) {
         Git git = new Git(new FileRepositoryBuilder().findGitDir(gitDir).build())
-        boolean changelogCommittedAtLeastOnce = ! git.log().addPath(changeLogRelativePath).setMaxCount(1).call().isEmpty()
+        boolean changelogCommittedAtLeastOnce = ! git.log()
+                .addPath(changeLogRelativePath).setMaxCount(1).call().empty
 
         LogCommand logCommand = git.log()
 
