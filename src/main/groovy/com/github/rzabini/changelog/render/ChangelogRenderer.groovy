@@ -38,6 +38,7 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
         ))
     }
 
+    @SuppressWarnings('Instanceof')
     @Override
     void visit(Heading heading) {
         (1..heading.level).each { textContent.write('#') }
@@ -52,7 +53,6 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
         if (!insideListItem) {
             aCapo(true)
         }
-        //textContent.line()
     }
 
     @Override
@@ -63,8 +63,9 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
     @Override
     void visit(BulletList bulletList) {
         visitChildren(bulletList)
-        if (bulletList.next)
+        if (bulletList.next) {
             aCapo(false)
+        }
     }
 
     @Override
@@ -120,7 +121,8 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
 
     private void aCapo(boolean blankLineSeparator) {
         newline()
-        if (blankLineSeparator)
+        if (blankLineSeparator) {
             newline()
+        }
     }
 }
