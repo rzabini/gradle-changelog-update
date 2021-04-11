@@ -6,7 +6,6 @@ import com.github.rzabini.changelog.model.Changelog
 import groovy.transform.CompileDynamic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-
 /**
  * Gradle plugin which updates changelog with last commit messages.
  */
@@ -21,7 +20,7 @@ class ChangelogUpdatePlugin implements Plugin<Project> {
             doLast {
                 Optional<File> changelogFile = changelogFile(project)
                 if (changelogFile.present) {
-                    List<Item> items = MessageParser.findRecentCommitMessages(project.rootDir, changelogFile.get())
+                    List<Item> items = MessageParser.findRecentCommitMessages(project.rootDir, CHANGELOG_FILE)
                     if (items.size() > 0) {
                         Changelog changelog = new Changelog(changelogFile.get())
                         items.each {

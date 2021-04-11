@@ -17,16 +17,16 @@ import java.util.regex.Matcher
 @CompileStatic
 class MessageParser {
 
-    static List<Item> findRecentCommitMessages(File gitDir, File changeLog) {
+    static List<Item> findRecentCommitMessages(File gitDir, String changeLogRelativePath) {
         Git git = new Git(new FileRepositoryBuilder().findGitDir(gitDir).build())
-        Iterable<RevCommit> lastChangelogCommit = git.log().addPath(gitDir.relativePath(changeLog)).setMaxCount(1).call()
+        boolean changelogCommittedAtLeastOnce = ! git.log().addPath(changeLogRelativePath).setMaxCount(1).call().isEmpty()
 
         LogCommand logCommand = git.log()
 
-        if (!lastChangelogCommit.isEmpty()) {
+        if (changelogCommittedAtLeastOnce) {
             ObjectId until = git.repository.resolve(Constants.HEAD)
-            ObjectId since = lastChangelogCommit.first().id
-            logCommand .addRange(since, until)
+            ObjectId since = git.log().addPath(changeLogRelativePath).setMaxCount(1).call().first().id
+            logCommand.addRange(since, until)
         }
 
         logCommand.call()
@@ -34,5 +34,4 @@ class MessageParser {
                 .findAll { it.matches() }
                 .collect { Matcher it -> new Item(it.group(1), it.group(2)) }
     }
-
 }
