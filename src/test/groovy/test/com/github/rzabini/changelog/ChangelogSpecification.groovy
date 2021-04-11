@@ -5,21 +5,14 @@ import spock.lang.Specification
 
 class ChangelogSpecification extends Specification {
 
-    def parse() {
-        when:
-            Changelog changelog = new Changelog(changelogFile('one-item'))
-        then:
-            changelog.render() == changelogFile('one-item').text
+    def 'render as original'(String changelogID) {
+        expect:
+            renderAsOriginal(changelogID)
+        where:
+            changelogID << ['initial', 'with-emphasis', 'longer-description']
     }
 
-    def parseWithEmphasis() {
-        when:
-            Changelog changelog = new Changelog(changelogFile('with-emphasis'))
-        then:
-            changelog.render() == changelogFile('with-emphasis').text
-    }
-
-    def add() {
+    def 'add first "Added" item'() {
         given:
             Changelog changelog = new Changelog(changelogFile('one-item'))
         when:
@@ -28,7 +21,7 @@ class ChangelogSpecification extends Specification {
             changelog.render() == changelogFile('two-items').text
     }
 
-    def addFixed() {
+    def 'create new section if not exists'() {
         given:
             Changelog changelog = new Changelog(changelogFile('one-item'))
         when:
@@ -37,7 +30,7 @@ class ChangelogSpecification extends Specification {
             changelog.render() == changelogFile('fixed-item-added').text
     }
 
-    def addWithPreviousVersion() {
+    def 'preserve changelog of previous versions'() {
         given:
             Changelog changelog = new Changelog(changelogFile('previous-version'))
         when:
@@ -46,8 +39,7 @@ class ChangelogSpecification extends Specification {
             changelog.render() == changelogFile('previous-version-add-item').text
     }
 
-
-    def fixWithPreviousVersion() {
+    def 'preserve changelog of previous version when adding a "Fixed" item'() {
         given:
             Changelog changelog = new Changelog(changelogFile('previous-version'))
         when:
@@ -56,7 +48,8 @@ class ChangelogSpecification extends Specification {
             changelog.render() == changelogFile('previous-version-fix-item').text
     }
 
-    def "Added is always first"() {
+
+    def 'preserve section ordering when adding an "Added" item'() {
         given:
             Changelog changelog = new Changelog(changelogFile('one-fixed-item'))
         when:
@@ -65,7 +58,7 @@ class ChangelogSpecification extends Specification {
             changelog.render() == changelogFile('one-fixed-item-add').text
     }
 
-    def "Security always last"() {
+    def 'preserve section ordering when adding a "Security" item'() {
         given:
             Changelog changelog = new Changelog(changelogFile('added-fixed'))
         when:
@@ -74,7 +67,7 @@ class ChangelogSpecification extends Specification {
             changelog.render() == changelogFile('added-fixed-security').text
     }
 
-    def "Fixed between Added and Security"() {
+    def 'preserve section ordering when adding a new section'() {
         given:
             Changelog changelog = new Changelog(changelogFile('added-security'))
         when:
@@ -83,7 +76,13 @@ class ChangelogSpecification extends Specification {
             changelog.render() == changelogFile('added-fixed-security').text
     }
 
-    private static File changelogFile(String issue) {
-        new File("src/test/resources/CHANGELOG-${issue}.MD")
+    private static File changelogFile(String changelogID) {
+        new File("src/test/resources/CHANGELOG-${changelogID}.MD")
+    }
+
+    private boolean renderAsOriginal(String changelogID) {
+        Changelog changelog = new Changelog(changelogFile(changelogID))
+        assert changelog.render() == changelogFile(changelogID).text
+        true
     }
 }

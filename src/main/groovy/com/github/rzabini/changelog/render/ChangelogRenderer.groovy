@@ -19,6 +19,7 @@ import org.commonmark.renderer.text.TextContentWriter
 class ChangelogRenderer  extends CoreTextContentNodeRenderer {
     public static final String STRONG_EMPHASIS_MARKER = '**'
     private final TextContentWriter textContent
+    private boolean insideListItem = false
 
     ChangelogRenderer(TextContentNodeRendererContext context) {
         super(context)
@@ -39,22 +40,19 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
 
     @Override
     void visit(Heading heading) {
-        if (heading.level > 1) {
-            newline()
-        }
         (1..heading.level).each { textContent.write('#') }
         textContent.whitespace()
         visitChildren(heading)
-        newline()
-        if (heading.level == 1) {
-            newline()
-        }
+        aCapo(heading.level == 1 || heading.next instanceof Heading)
     }
 
     @Override
     void visit(Paragraph paragraph) {
         visitChildren(paragraph)
-        textContent.line()
+        if (!insideListItem) {
+            aCapo(true)
+        }
+        //textContent.line()
     }
 
     @Override
@@ -65,13 +63,17 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
     @Override
     void visit(BulletList bulletList) {
         visitChildren(bulletList)
+        if (bulletList.next)
+            aCapo(false)
     }
 
     @Override
     void visit(ListItem listItem) {
+        insideListItem = true
         textContent.write('- ')
         visitChildren(listItem)
-        textContent.line()
+        aCapo(false)
+        insideListItem = false
     }
 
     @Override
@@ -114,5 +116,11 @@ class ChangelogRenderer  extends CoreTextContentNodeRenderer {
 
     private void newline() {
         textContent.write('\n')
+    }
+
+    private void aCapo(boolean blankLineSeparator) {
+        newline()
+        if (blankLineSeparator)
+            newline()
     }
 }
